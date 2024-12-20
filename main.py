@@ -41,6 +41,9 @@ class MemoryGame:
         self.result_label = tk.Label(self.root, text="", font=("Helvetica", 14))
         self.result_label.pack(pady=20)
 
+        self.countdown_label = tk.Label(self.root, text="", font=("Helvetica", 10), fg="gray")
+        self.countdown_label.pack(pady=5)
+
     def start_game(self):
         difficulty = self.selected_level.get()
         count = self.levels[difficulty]
@@ -50,21 +53,46 @@ class MemoryGame:
 
     def show_numbers(self):
         self.result_label.config(text=" ".join(map(str, self.numbers_to_memorize)), fg="blue")
-        self.root.update()
-        time.sleep(3)
-        self.result_label.config(text="")
-        self.ask_for_numbers()
+        self.countdown(3)
+
+    def countdown(self, seconds):
+        if seconds > 0:
+            self.countdown_label.config(text=f"Числа исчезнут через: {seconds} сек")
+            self.root.update()
+            self.root.after(1000, self.countdown, seconds - 1)
+        else:
+            self.countdown_label.config(text="")
+            self.result_label.config(text="")
+            self.ask_for_numbers()
 
     def ask_for_numbers(self):
         user_input = []
         for i in range(len(self.numbers_to_memorize)):
-            number = simpledialog.askinteger("Вспомните", f"Введите число {i + 1}:")
-            if number is None:
-                messagebox.showwarning("Предупреждение", "Вы вышли из игры досрочно!")
-                return
-            user_input.append(number)
+            input_window = tk.Toplevel(self.root)
+            input_window.title("Ввод числа")
+
+            prompt_label = tk.Label(input_window, text=f"Введите число {i + 1}:", font=("Helvetica", 14))
+            prompt_label.pack(pady=10)
+
+            input_entry = tk.Entry(input_window, font=("Helvetica", 14))
+            input_entry.pack(pady=10)
+            input_entry.focus_set()
+
+            submit_button = tk.Button(input_window, text="ОК", font=("Helvetica", 12), command=lambda: self.get_user_input(input_entry, input_window, user_input))
+            submit_button.pack(pady=10)
+
+            self.root.wait_window(input_window)
 
         self.check_results(user_input)
+
+    def get_user_input(self, input_entry, input_window, user_input):
+        try:
+            number = int(input_entry.get())
+            user_input.append(number)
+        except ValueError:
+            messagebox.showerror("Ошибка", "Пожалуйста, введите корректное число.")
+            return
+        input_window.destroy()
 
     def check_results(self, user_input):
         if user_input == self.numbers_to_memorize:

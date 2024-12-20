@@ -49,19 +49,10 @@ class MemoryGame:
         self.show_numbers()
 
     def show_numbers(self):
-        self.result_label.config(text="Запомните эти числа:")
-
-        numbers_window = tk.Toplevel(self.root)
-        numbers_window.title("Запоминание")
-
-        numbers_label = tk.Label(numbers_window, text=" ".join(map(str, self.numbers_to_memorize)), font=("Helvetica", 18))
-        numbers_label.pack(pady=20)
-
-        close_button = tk.Button(numbers_window, text="Закрыть", command=lambda: self.close_numbers_window(numbers_window))
-        close_button.pack(pady=10)
-
-    def close_numbers_window(self, window):
-        window.destroy()
+        self.result_label.config(text=" ".join(map(str, self.numbers_to_memorize)), fg="blue")
+        self.root.update()
+        time.sleep(3)
+        self.result_label.config(text="")
         self.ask_for_numbers()
 
     def ask_for_numbers(self):

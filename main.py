@@ -45,62 +45,84 @@ class MemoryGame:
         self.countdown_label.pack(pady=5)
 
     def start_game(self):
-        difficulty = self.selected_level.get()
-        count = self.levels[difficulty]
-        self.numbers_to_memorize = [random.randint(0, 99) for _ in range(count)]
-
-        self.show_numbers()
+        try:
+            difficulty = self.selected_level.get()
+            count = self.levels[difficulty]
+            self.numbers_to_memorize = [random.randint(0, 99) for _ in range(count)]
+            self.show_numbers()
+        except KeyError:
+            messagebox.showerror("Ошибка", "Не удалось определить сложность игры.")
+            return
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
+            return
 
     def show_numbers(self):
-        self.result_label.config(text=" ".join(map(str, self.numbers_to_memorize)), fg="blue")
-        self.countdown(3)
+        try:
+            self.result_label.config(text=" ".join(map(str, self.numbers_to_memorize)), fg="blue")
+            self.countdown(3)
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Произошла ошибка при отображении чисел: {e}")
 
     def countdown(self, seconds):
         if seconds > 0:
-            self.countdown_label.config(text=f"Числа исчезнут через: {seconds} сек")
-            self.root.update()
-            self.root.after(1000, self.countdown, seconds - 1)
+            try:
+                self.countdown_label.config(text=f"Числа исчезнут через: {seconds} сек")
+                self.root.update()
+                self.root.after(1000, self.countdown, seconds - 1)
+            except Exception as e:
+                messagebox.showerror("Ошибка", f"Произошла ошибка в отсчете времени: {e}")
         else:
             self.countdown_label.config(text="")
             self.result_label.config(text="")
             self.ask_for_numbers()
 
     def ask_for_numbers(self):
-        user_input = []
-        for i in range(len(self.numbers_to_memorize)):
-            input_window = tk.Toplevel(self.root)
-            input_window.title("Ввод числа")
+        try:
+            user_input = []
+            for i in range(len(self.numbers_to_memorize)):
+                input_window = tk.Toplevel(self.root)
+                input_window.title("Ввод числа")
 
-            prompt_label = tk.Label(input_window, text=f"Введите число {i + 1}:", font=("Helvetica", 14))
-            prompt_label.pack(pady=10)
+                prompt_label = tk.Label(input_window, text=f"Введите число {i + 1}:", font=("Helvetica", 14))
+                prompt_label.pack(pady=10)
 
-            input_entry = tk.Entry(input_window, font=("Helvetica", 14))
-            input_entry.pack(pady=10)
-            input_entry.focus_set()
+                input_entry = tk.Entry(input_window, font=("Helvetica", 14))
+                input_entry.pack(pady=10)
+                input_entry.focus_set()
 
-            submit_button = tk.Button(input_window, text="ОК", font=("Helvetica", 12), command=lambda: self.get_user_input(input_entry, input_window, user_input))
-            submit_button.pack(pady=10)
+                submit_button = tk.Button(input_window, text="ОК", font=("Helvetica", 12), command=lambda: self.get_user_input(input_entry, input_window, user_input))
+                submit_button.pack(pady=10)
 
-            self.root.wait_window(input_window)
+                self.root.wait_window(input_window)
 
-        self.check_results(user_input)
+            self.check_results(user_input)
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Произошла ошибка при запросе чисел: {e}")
 
     def get_user_input(self, input_entry, input_window, user_input):
         try:
             number = int(input_entry.get())
             user_input.append(number)
+            input_window.destroy()
         except ValueError:
             messagebox.showerror("Ошибка", "Пожалуйста, введите корректное число.")
-            return
-        input_window.destroy()
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Произошла ошибка при обработке числа: {e}")
 
     def check_results(self, user_input):
-        if user_input == self.numbers_to_memorize:
-            self.result_label.config(text="Верно! Вы запомнили все числа!", fg="green")
-        else:
-            self.result_label.config(text=f"Неверно! Правильные числа были: {', '.join(map(str, self.numbers_to_memorize))}", fg="red")
+        try:
+            if user_input == self.numbers_to_memorize:
+                self.result_label.config(text="Верно! Вы запомнили все числа!", fg="green")
+            else:
+                self.result_label.config(text=f"Неверно! Правильные числа были: {', '.join(map(str, self.numbers_to_memorize))}", fg="red")
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Произошла ошибка при проверке результатов: {e}")
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    game = MemoryGame(root)
-    root.mainloop()
+    try:
+        root = tk.Tk()
+        game = MemoryGame(root)
+        root.mainloop()
+    except Exception as e:
+        messagebox.showerror("Ошибка", f"Произошла ошибка при запуске игры: {e}")
